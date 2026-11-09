@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1 : 137.000 - El Desafío</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Canvas Confetti CDN for victory animation -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'bounce-short': 'bounceShort 0.3s ease-in-out',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { boxShadow: '0 0 15px -3px rgba(99, 102, 241, 0.3)' },
+                            '100%': { boxShadow: '0 0 35px 5px rgba(139, 92, 246, 0.6)' }
+                        },
+                        bounceShort: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(0.95)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom smooth focus and active states */
+        .btn-glow {
+            box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25), 0 0 10px -2px rgba(168, 85, 247, 0.2);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 40px 2px rgba(99, 102, 241, 0.45), 0 0 20px 5px rgba(168, 85, 247, 0.35);
+        }
+        .btn-glow:active {
+            transform: scale(0.96);
+            box-shadow: 0 0 15px 0px rgba(99, 102, 241, 0.6);
+        }
+
+        /* Subtle grid background pattern */
+        .bg-grid-pattern {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between items-center font-sans relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+
+    <!-- Subtle Background Ambient Glows -->
+    <div class="fixed inset-0 pointer-events-none bg-grid-pattern z-0 opacity-60"></div>
+    <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="fixed bottom-1/4 left-1/2 -translate-x-1/2 translate-y-1/2 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Header Section -->
+    <header class="w-full max-w-4xl px-6 pt-8 pb-4 flex justify-between items-center z-10">
+        <div class="flex items-center space-x-3">
+            <div class="w-3 h-3 rounded-full bg-indigo-500 animate-pulse"></div>
+            <span class="text-xs uppercase tracking-widest text-slate-400 font-mono">Probabilidad 1 : 137.000</span>
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <!-- Mute Audio Toggle Button -->
+            <button id="audioToggle" title="Activar/Desactivar Sonido" class="p-2 text-slate-400 hover:text-slate-200 transition-colors rounded-lg bg-slate-900/60 border border-slate-800">
+                <svg id="iconSoundOn" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                <svg id="iconSoundOff" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>
+            </button>
+            
+            <!-- Continuous Hold/Auto Click Mode Toggle -->
+            <button id="autoClickToggle" class="px-3 py-1.5 text-xs font-mono text-slate-400 hover:text-slate-200 bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800 rounded-lg transition-all flex items-center gap-1.5">
+                <span id="autoIndicator" class="w-2 h-2 rounded-full bg-slate-600"></span>
+                <span>Modo Rápido</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area: The Central Button -->
+    <main class="w-full max-w-xl px-6 flex-1 flex flex-col justify-center items-center z-10 my-auto py-12 text-center">
+        
+        <!-- Status indicator text above button -->
+        <div id="statusText" class="text-sm font-mono text-slate-400 mb-8 tracking-wider transition-opacity duration-300">
+            PRESIONA PARA PROBAR TU SUERTE
+        </div>
+
+        <!-- Main Interactive Button -->
+        <div class="relative group">
+            <!-- Glowing background blur ring -->
+            <div id="buttonGlow" class="absolute -inset-1 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-30 blur-lg group-hover:opacity-60 transition duration-500"></div>
+            
+            <!-- Interactive Action Button -->
+            <button id="actionBtn" class="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-slate-900 border border-slate-700/80 btn-glow flex flex-col justify-center items-center p-4 cursor-pointer select-none active:outline-none focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-300">
+                    <svg class="w-8 h-8 sm:w-10 sm:h-10 text-indigo-400 group-hover:text-indigo-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                    </svg>
+                </div>
+                <span class="text-base sm:text-lg font-semibold text-slate-100 tracking-wide group-hover:text-white">PROBAR</span>
+                <span class="text-xs font-mono text-slate-500 mt-1">1 en 137.000</span>
+            </button>
+        </div>
+
+        <!-- Feedback message below button (Last Roll Result) -->
+        <div id="lastRollResult" class="h-8 mt-8 flex items-center justify-center">
+            <span class="text-xs font-mono text-slate-500 transition-all duration-150 opacity-0" id="rollFeedback">
+                Sigue intentando...
+            </span>
+        </div>
+
+    </main>
+
+    <!-- Footer Stats & Counter Section -->
+    <footer class="w-full max-w-4xl px-6 py-6 border-t border-slate-900/80 z-10 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono text-slate-400">
+        
+        <!-- Left: Attempt Counter -->
+        <div class="flex items-center gap-3 bg-slate-900/50 px-4 py-2 rounded-lg border border-slate-800/80">
+            <span class="text-slate-500">INTENTOS:</span>
+            <span id="attemptCount" class="text-base font-bold text-indigo-400">0</span>
+        </div>
+
+        <!-- Center: Accumulated Statistical Probability -->
+        <div class="flex items-center gap-2">
+            <span class="text-slate-500">Probabilidad Acumulada:</span>
+            <span id="cumulativeOdds" class="text-slate-300">0,0000%</span>
+        </div>
+
+        <!-- Right: Reset Button -->
+        <button id="resetBtn" class="hover:text-slate-200 transition-colors flex items-center gap-1.5 opacity-60 hover:opacity-100">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <span>Reiniciar Contador</span>
+        </button>
+
+    </footer>
+
+    <!-- WIN MODAL OVERLAY -->
+    <div id="winModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-50 flex items-center justify-center p-6 hidden opacity-0 transition-opacity duration-500">
+        <div class="bg-slate-900 border border-emerald-500/40 rounded-3xl p-8 sm:p-12 max-w-md w-full text-center shadow-2xl shadow-emerald-500/20 transform scale-95 transition-transform duration-500 relative overflow-hidden" id="winModalCard">
+            
+            <!-- Decorative Win Light Glow -->
+            <div class="absolute -top-24 -left-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Trophy Icon -->
+            <div class="w-20 h-20 bg-emerald-950/80 border border-emerald-500/40 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-900/50">
+                <svg class="w-10 h-10 text-emerald-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                </svg>
+            </div>
+
+            <!-- Headline -->
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400 mb-2 tracking-tight">
+                ¡GANASTE!
+            </h1>
+
+            <p class="text-slate-300 text-sm mb-6">
+                Has vencido las probabilidades de 1 en 137.000.
+            </p>
+
+            <!-- Stats Container -->
+            <div class="bg-slate-950/70 rounded-xl p-4 border border-slate-800 mb-8 space-y-2 font-mono text-xs text-slate-400">
+                <div class="flex justify-between">
+                    <span>Intentos requeridos:</span>
+                    <span id="winAttempts" class="text-emerald-400 font-bold">0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Probabilidad del evento:</span>
+                    <span class="text-slate-200">0.00073%</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col gap-3">
+                <button id="closeWinBtn" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold text-sm tracking-wide transition-all transform active:scale-95 shadow-lg shadow-emerald-500/25">
+                    ¡Continuar Jugando!
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- State Management ---
+        const CHANCE = 1 / 137000;
+        let attempts = parseInt(localStorage.getItem('137k_attempts') || '0', 10);
+        let audioEnabled = true;
+        let isAutoClicking = false;
+        let autoClickInterval = null;
+        let isHolding = false;
+        let holdTimeout = null;
+
+        // --- DOM Elements ---
+        const actionBtn = document.getElementById('actionBtn');
+        const attemptCountEl = document.getElementById('attemptCount');
+        const cumulativeOddsEl = document.getElementById('cumulativeOdds');
+        const rollFeedback = document.getElementById('rollFeedback');
+        const statusText = document.getElementById('statusText');
+        const resetBtn = document.getElementById('resetBtn');
+        const winModal = document.getElementById('winModal');
+        const winModalCard = document.getElementById('winModalCard');
+        const winAttemptsEl = document.getElementById('winAttempts');
+        const closeWinBtn = document.getElementById('closeWinBtn');
+        const audioToggle = document.getElementById('audioToggle');
+        const iconSoundOn = document.getElementById('iconSoundOn');
+        const iconSoundOff = document.getElementById('iconSoundOff');
+        const autoClickToggle = document.getElementById('autoClickToggle');
+        const autoIndicator = document.getElementById('autoIndicator');
+
+        // --- Web Audio API Synthesizer (No external sound files required) ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Play standard click sound
+        function playClickSound() {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.04);
+                
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.04);
+            } catch (e) {
+                // Ignore audio restriction errors
+            }
+        }
+
+        // Play grand victory fanfare
+        function playWinSound() {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C5, E5, G5, C6, E6
+                notes.forEach((freq, index) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + index * 0.1);
+                    
+                    gain.gain.setValueAtTime(0, audioCtx.currentTime + index * 0.1);
+                    gain.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + index * 0.1 + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + index * 0.1 + 0.8);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(audioCtx.currentTime + index * 0.1);
+                    osc.stop(audioCtx.currentTime + index * 0.1 + 0.85);
+                });
+            } catch(e) {
+                // Ignore audio errors
+            }
+        }
+
+        // --- Stats Update Function ---
+        function updateStatsUI() {
+            attemptCountEl.textContent = attempts.toLocaleString('es-ES');
+            
+            // Calculate cumulative probability: 1 - (1 - p)^n
+            const pNotInSingle = 1 - CHANCE;
+            const probNotWinning = Math.pow(pNotInSingle, attempts);
+            const cumulativeProb = (1 - probNotWinning) * 100;
+            
+            if (cumulativeProb < 0.0001 && attempts > 0) {
+                cumulativeOddsEl.textContent = '< 0,0001%';
+            } else {
+                cumulativeOddsEl.textContent = cumulativeProb.toFixed(4).replace('.', ',') + '%';
+            }
+
+            // Save to localStorage
+            localStorage.setItem('137k_attempts', attempts.toString());
+        }
+
+        // --- Celebration Trigger ---
+        function triggerWin() {
+            stopAutoClick();
+            playWinSound();
+
+            winAttemptsEl.textContent = attempts.toLocaleString('es-ES');
+            
+            // Show Modal with animation
+            winModal.classList.remove('hidden');
+            setTimeout(() => {
+                winModal.classList.remove('opacity-0');
+                winModalCard.classList.remove('scale-95');
+                winModalCard.classList.add('scale-100');
+            }, 10);
+
+            // Confetti Blast
+            if (typeof confetti === 'function') {
+                const count = 200;
+                const defaults = {
+                    origin: { y: 0.7 }
+                };
+
+                function fire(particleRatio, opts) {
+                    confetti(Object.assign({}, defaults, opts, {
+                        particleCount: Math.floor(count * particleRatio)
+                    }));
+                }
+
+                fire(0.25, { spread: 26, startVelocity: 55 });
+                fire(0.2, { spread: 60 });
+                fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+                fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+                fire(0.1, { spread: 120, startVelocity: 45 });
+            }
+        }
+
+        // --- Core Action logic ---
+        function executeRoll() {
+            attempts++;
+            updateStatsUI();
+            playClickSound();
+
+            // Random draw logic
+            const roll = Math.random();
+            const hasWon = roll < CHANCE;
+
+            if (hasWon) {
+                triggerWin();
+                statusText.textContent = "¡INCREMENTABLE! ¡LO LOGRASTE!";
+                statusText.className = "text-sm font-mono text-emerald-400 font-bold mb-8 tracking-wider";
+            } else {
+                // Micro feedback animation
+                rollFeedback.textContent = `No se dio... (#${attempts})`;
+                rollFeedback.style.opacity = '1';
+                
+                // Clear feedback fade
+                clearTimeout(rollFeedback._timer);
+                rollFeedback._timer = setTimeout(() => {
+                    rollFeedback.style.opacity = '0';
+                }, 1200);
+            }
+        }
+
+        // --- Auto Clicker Feature (Mode Rápido) ---
+        function toggleAutoClick() {
+            if (isAutoClicking) {
+                stopAutoClick();
+            } else {
+                startAutoClick();
+            }
+        }
+
+        function startAutoClick() {
+            isAutoClicking = true;
+            autoIndicator.classList.remove('bg-slate-600');
+            autoIndicator.classList.add('bg-emerald-400', 'animate-ping');
+            autoClickToggle.classList.add('border-emerald-500/50', 'text-emerald-300');
+            
+            // Execute rolls rapidly (approx 40 rolls/sec)
+            autoClickInterval = setInterval(() => {
+                executeRoll();
+            }, 25);
+        }
+
+        function stopAutoClick() {
+            isAutoClicking = false;
+            if (autoClickInterval) {
+                clearInterval(autoClickInterval);
+                autoClickInterval = null;
+            }
+            autoIndicator.classList.remove('bg-emerald-400', 'animate-ping');
+            autoIndicator.classList.add('bg-slate-600');
+            autoClickToggle.classList.remove('border-emerald-500/50', 'text-emerald-300');
+        }
+
+        // --- Event Listeners ---
+
+        // Single click event
+        actionBtn.addEventListener('click', (e) => {
+            if (!isAutoClicking) {
+                executeRoll();
+            }
+        });
+
+        // Touch/Mouse Hold to continuously roll fast
+        const startHold = () => {
+            if (isAutoClicking) return;
+            isHolding = true;
+            holdTimeout = setTimeout(() => {
+                if (isHolding) {
+                    startAutoClick();
+                }
+            }, 500); // Start auto-mode after 500ms hold
+        };
+
+        const stopHold = () => {
+            isHolding = false;
+            if (holdTimeout) clearTimeout(holdTimeout);
+        };
+
+        actionBtn.addEventListener('mousedown', startHold);
+        actionBtn.addEventListener('mouseup', stopHold);
+        actionBtn.addEventListener('mouseleave', stopHold);
+        actionBtn.addEventListener('touchstart', (e) => { startHold(); }, { passive: true });
+        actionBtn.addEventListener('touchend', stopHold);
+
+        // Fast Mode Toggle
+        autoClickToggle.addEventListener('click', toggleAutoClick);
+
+        // Mute / Unmute Audio Toggle
+        audioToggle.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            if (audioEnabled) {
+                iconSoundOn.classList.remove('hidden');
+                iconSoundOff.classList.add('hidden');
+            } else {
+                iconSoundOn.classList.add('hidden');
+                iconSoundOff.classList.remove('hidden');
+            }
+        });
+
+        // Reset Counter Button
+        resetBtn.addEventListener('click', () => {
+            if (confirm('¿Deseas reiniciar tu contador de intentos a 0?')) {
+                attempts = 0;
+                updateStatsUI();
+                statusText.textContent = "PRESIONA PARA PROBAR TU SUERTE";
+                statusText.className = "text-sm font-mono text-slate-400 mb-8 tracking-wider";
+            }
+        });
+
+        // Close Win Modal
+        closeWinBtn.addEventListener('click', () => {
+            winModal.classList.add('opacity-0');
+            winModalCard.classList.remove('scale-100');
+            winModalCard.classList.add('scale-95');
+            setTimeout(() => {
+                winModal.classList.add('hidden');
+            }, 500);
+        });
+
+        // Developer / Testing Keyboard Shortcut (Shift + W forces a win to demo animation)
+        window.addEventListener('keydown', (e) => {
+            if (e.shiftKey && (e.key === 'W' || e.key === 'w')) {
+                attempts++;
+                updateStatsUI();
+                triggerWin();
+            }
+        });
+
+        // --- Initial Setup ---
+        updateStatsUI();
+    </script>
+</body>
+</html>
